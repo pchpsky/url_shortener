@@ -1,0 +1,44 @@
+<.header>
+  Listing Urls
+  <:actions>
+    <.link patch={~p"/urls/new"}>
+      <.button>New Url</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table id="urls" rows={@streams.urls}>
+  <:col :let={{_id, url}} label="Long url">
+    <.link href={url.long_url} class="hover:underline" target="_blank"><%= url.long_url %></.link>
+  </:col>
+  <:col :let={{_id, url}} label="Short url">
+    <.link href={~p"/#{url.code}"} target="_blank" class="font-bold hover:underline">
+      <%= url(~p"/#{url.code}") %>
+    </.link>
+  </:col>
+  <:action :let={{_id, url}}>
+    <.link navigate={~p"/urls/#{url}"}>Show</.link>
+  </:action>
+  <:action :let={{_id, url}}>
+    <.link patch={~p"/urls/#{url}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, url}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: url.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal :if={@live_action in [:new, :edit]} id="url-modal" show on_cancel={JS.patch(~p"/")}>
+  <.live_component
+    module={UrlShortenerWeb.UrlLive.FormComponent}
+    id={@url.id || :new}
+    title={@page_title}
+    action={@live_action}
+    url={@url}
+    patch={~p"/"}
+  />
+</.modal>
